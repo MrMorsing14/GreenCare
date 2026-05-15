@@ -46,7 +46,7 @@ export default function PlantDetailScreen({ route, navigation }) {
       Alert.alert("Error", "Failed to save plant: " + error.message);
     } else {
       Alert.alert("Saved!", `${plant.name} has been added to your garden.`, [
-        { text: "OK", onPress: () => navigation.navigate("GardenList") },
+        { text: "OK", onPress: () => navigation.popToTop() },
       ]);
     }
   };
