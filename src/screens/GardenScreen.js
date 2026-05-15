@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useFocusEffect } from "@react-navigation/native";
 import { supabase } from "../config/supabase";
@@ -32,10 +32,33 @@ export default function GardenScreen() {
     }, [])
   );
 
+  const handleDelete = (plant) => {
+    Alert.alert("Delete Plant", `Remove ${plant.name} from your garden?`, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          const { error } = await supabase
+            .from("plants")
+            .delete()
+            .eq("id", plant.id);
+
+          if (error) {
+            Alert.alert("Error", "Failed to delete plant");
+          } else {
+            setPlants((prev) => prev.filter((p) => p.id !== plant.id));
+          }
+        },
+      },
+    ]);
+  };
+
   const renderPlant = ({ item }) => (
     <TouchableOpacity
       style={styles.plantCard}
       onPress={() => navigation.navigate("PlantDetail", { plant: item })}
+      onLongPress={() => handleDelete(item)}
     >
       <Text style={styles.plantName}>{item.name}</Text>
       <Text style={styles.plantDate}>
