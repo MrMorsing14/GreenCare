@@ -1,15 +1,47 @@
-import { useState } from "react";
-import { View, Text, StyleSheet, FlatList } from "react-native";
+import { useState, useEffect, useCallback } from "react";
+import { View, Text, StyleSheet, FlatList, TouchableOpacity } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect } from "@react-navigation/native";
+import { supabase } from "../config/supabase";
 
 export default function GardenScreen() {
-  // TODO: Fetch from Firestore
   const [plants, setPlants] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const navigation = useNavigation();
+
+  const fetchPlants = async () => {
+    setLoading(true);
+    const { data: { user } } = await supabase.auth.getUser();
+
+    const { data, error } = await supabase
+      .from("plants")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+
+    if (!error && data) {
+      setPlants(data);
+    }
+    setLoading(false);
+  };
+
+  // Refetch when screen comes into focus (e.g. after saving a new plant)
+  useFocusEffect(
+    useCallback(() => {
+      fetchPlants();
+    }, [])
+  );
 
   const renderPlant = ({ item }) => (
-    <View style={styles.plantCard}>
+    <TouchableOpacity
+      style={styles.plantCard}
+      onPress={() => navigation.navigate("PlantDetail", { plant: item })}
+    >
       <Text style={styles.plantName}>{item.name}</Text>
-      <Text style={styles.plantDate}>{item.date}</Text>
-    </View>
+      <Text style={styles.plantDate}>
+        {new Date(item.created_at).toLocaleDateString()}
+      </Text>
+    </TouchableOpacity>
   );
 
   const renderEmpty = () => (
@@ -26,10 +58,12 @@ export default function GardenScreen() {
       <Text style={styles.title}>My Garden</Text>
       <FlatList
         data={plants}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
         renderItem={renderPlant}
         ListEmptyComponent={renderEmpty}
         contentContainerStyle={plants.length === 0 && styles.emptyList}
+        refreshing={loading}
+        onRefresh={fetchPlants}
       />
     </View>
   );

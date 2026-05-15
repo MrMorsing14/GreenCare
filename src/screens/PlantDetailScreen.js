@@ -1,7 +1,18 @@
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import { useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
+import { supabase } from "../config/supabase";
 
 export default function PlantDetailScreen({ route, navigation }) {
-  // Plant data will come from route.params after camera + API flow
+  const [saving, setSaving] = useState(false);
+
+  // Plant data comes from route.params after camera + API flow
   const plant = route?.params?.plant || {
     name: "Unknown Plant",
     confidence: 0,
@@ -12,18 +23,50 @@ export default function PlantDetailScreen({ route, navigation }) {
     },
   };
 
-  const handleSaveToGarden = () => {
-    // TODO: Save to Firestore
-    Alert.alert("TODO", "Save to Firestore not implemented yet");
+  // If plant already has an id, it was loaded from the garden (already saved)
+  const isAlreadySaved = !!plant.id;
+
+  const handleSaveToGarden = async () => {
+    setSaving(true);
+    const { data: { user } } = await supabase.auth.getUser();
+
+    const { error } = await supabase.from("plants").insert({
+      user_id: user.id,
+      name: plant.name,
+      confidence: plant.confidence,
+      care_water: plant.care.water,
+      care_sunlight: plant.care.sunlight,
+      care_soil: plant.care.soil,
+      image_url: plant.image_url || null,
+    });
+
+    setSaving(false);
+
+    if (error) {
+      Alert.alert("Error", "Failed to save plant: " + error.message);
+    } else {
+      Alert.alert("Saved!", `${plant.name} has been added to your garden.`, [
+        { text: "OK", onPress: () => navigation.navigate("GardenList") },
+      ]);
+    }
+  };
+
+  // For plants loaded from the garden, map the flat DB columns back to nested care object
+  const care = plant.care || {
+    water: plant.care_water || "N/A",
+    sunlight: plant.care_sunlight || "N/A",
+    soil: plant.care_soil || "N/A",
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.plantName}>{plant.name}</Text>
-        <Text style={styles.confidence}>
-          {Math.round(plant.confidence * 100)}% confidence
-        </Text>
+        {plant.confidence > 0 && (
+          <Text style={styles.confidence}>
+            {Math.round(plant.confidence * 100)}% confidence
+          </Text>
+        )}
       </View>
 
       <View style={styles.careSection}>
@@ -31,29 +74,41 @@ export default function PlantDetailScreen({ route, navigation }) {
 
         <View style={styles.careItem}>
           <Text style={styles.careLabel}>Water</Text>
-          <Text style={styles.careValue}>{plant.care.water}</Text>
+          <Text style={styles.careValue}>{care.water}</Text>
         </View>
 
         <View style={styles.careItem}>
           <Text style={styles.careLabel}>Sunlight</Text>
-          <Text style={styles.careValue}>{plant.care.sunlight}</Text>
+          <Text style={styles.careValue}>{care.sunlight}</Text>
         </View>
 
         <View style={styles.careItem}>
           <Text style={styles.careLabel}>Soil</Text>
-          <Text style={styles.careValue}>{plant.care.soil}</Text>
+          <Text style={styles.careValue}>{care.soil}</Text>
         </View>
       </View>
 
-      <TouchableOpacity style={styles.saveButton} onPress={handleSaveToGarden}>
-        <Text style={styles.saveButtonText}>Save to My Garden</Text>
-      </TouchableOpacity>
+      {!isAlreadySaved && (
+        <TouchableOpacity
+          style={styles.saveButton}
+          onPress={handleSaveToGarden}
+          disabled={saving}
+        >
+          {saving ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.saveButtonText}>Save to My Garden</Text>
+          )}
+        </TouchableOpacity>
+      )}
 
       <TouchableOpacity
         style={styles.retakeButton}
         onPress={() => navigation.goBack()}
       >
-        <Text style={styles.retakeText}>Take Another Photo</Text>
+        <Text style={styles.retakeText}>
+          {isAlreadySaved ? "Back to Garden" : "Take Another Photo"}
+        </Text>
       </TouchableOpacity>
     </View>
   );

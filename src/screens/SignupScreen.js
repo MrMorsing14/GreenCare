@@ -8,20 +8,40 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  ActivityIndicator,
 } from "react-native";
+import { supabase } from "../config/supabase";
 
 export default function SignupScreen({ navigation }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSignup = () => {
+  const handleSignup = async () => {
+    if (!email || !password || !confirmPassword) {
+      Alert.alert("Error", "Please fill in all fields");
+      return;
+    }
     if (password !== confirmPassword) {
       Alert.alert("Error", "Passwords don't match");
       return;
     }
-    // TODO: Firebase auth signup
-    Alert.alert("TODO", "Firebase signup not implemented yet");
+
+    setLoading(true);
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+    setLoading(false);
+
+    if (error) {
+      Alert.alert("Signup Failed", error.message);
+    } else {
+      Alert.alert("Success", "Account created! You can now log in.", [
+        { text: "OK", onPress: () => navigation.navigate("Login") },
+      ]);
+    }
   };
 
   return (
@@ -58,8 +78,16 @@ export default function SignupScreen({ navigation }) {
           secureTextEntry
         />
 
-        <TouchableOpacity style={styles.button} onPress={handleSignup}>
-          <Text style={styles.buttonText}>Sign Up</Text>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleSignup}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Sign Up</Text>
+          )}
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate("Login")}>
