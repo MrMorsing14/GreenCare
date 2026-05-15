@@ -64,24 +64,43 @@ export default function CameraScreen({ navigation }) {
 
     setLoading(true);
 
-    // TODO: Send photo to ML server for identification
-    // TODO: Call plant care API with the result
-    // For now, simulate with mock data
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const formData = new FormData();
+      formData.append("file", {
+        uri: photo,
+        type: "image/jpeg",
+        name: "plant.jpg",
+      });
+
+      const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/predict`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Server returned " + response.status);
+      }
+
+      const result = await response.json();
+
       navigation.navigate("PlantDetail", {
         plant: {
-          name: "Monstera Deliciosa",
-          confidence: 0.78,
+          name: result.prediction,
+          confidence: result.confidence,
           image_url: photo,
+          top_3: result.top_3,
           care: {
-            water: "Once a week, let soil dry between waterings",
-            sunlight: "Bright indirect light",
-            soil: "Well-draining potting mix",
+            water: "TODO — plant care API",
+            sunlight: "TODO — plant care API",
+            soil: "TODO — plant care API",
           },
         },
       });
-    }, 1500);
+    } catch (error) {
+      Alert.alert("Identification Failed", error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleRetake = () => {
