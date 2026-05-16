@@ -1,0 +1,237 @@
+{
+  "African Violet (Saintpaulia ionantha)": {
+    "water": "Water when top of soil feels dry, avoid getting water on leaves",
+    "sunlight": "Bright indirect light, no direct sun",
+    "soil": "Light, well-draining African violet mix"
+  },
+  "Aloe Vera": {
+    "water": "Every 2-3 weeks, let soil dry completely between waterings",
+    "sunlight": "Bright direct or indirect light",
+    "soil": "Sandy, well-draining cactus/succulent mix"
+  },
+  "Anthurium (Anthurium andraeanum)": {
+    "water": "Water when top 2cm of soil is dry, keep slightly moist",
+    "sunlight": "Bright indirect light, no direct sun",
+    "soil": "Coarse, well-draining mix with perlite and orchid bark"
+  },
+  "Areca Palm (Dypsis lutescens)": {
+    "water": "Water when top few cm of soil are dry, keep evenly moist",
+    "sunlight": "Bright indirect light",
+    "soil": "Well-draining peat-based potting mix"
+  },
+  "Asparagus Fern (Asparagus setaceus)": {
+    "water": "Keep soil consistently moist, do not let dry out completely",
+    "sunlight": "Bright indirect light, tolerates some shade",
+    "soil": "Rich, well-draining potting mix"
+  },
+  "Begonia (Begonia spp.)": {
+    "water": "Water when top 2cm of soil is dry, avoid overwatering",
+    "sunlight": "Bright indirect light, some morning sun is fine",
+    "soil": "Light, well-draining mix with peat and perlite"
+  },
+  "Bird of Paradise (Strelitzia reginae)": {
+    "water": "Water every 1-2 weeks, let soil dry between waterings",
+    "sunlight": "Bright direct light, at least 6 hours",
+    "soil": "Rich, well-draining potting mix with compost"
+  },
+  "Birds Nest Fern (Asplenium nidus)": {
+    "water": "Keep soil consistently moist, water around edges not center",
+    "sunlight": "Medium indirect light, no direct sun",
+    "soil": "Rich, moisture-retaining mix with peat"
+  },
+  "Boston Fern (Nephrolepis exaltata)": {
+    "water": "Keep soil consistently moist, mist regularly for humidity",
+    "sunlight": "Bright indirect light, no direct sun",
+    "soil": "Rich, peat-based mix that retains moisture"
+  },
+  "Calathea": {
+    "water": "Keep soil evenly moist, use filtered or rainwater",
+    "sunlight": "Medium to low indirect light, no direct sun",
+    "soil": "Well-draining peat-based mix with perlite"
+  },
+  "Cast Iron Plant (Aspidistra elatior)": {
+    "water": "Water when soil is dry, very drought tolerant",
+    "sunlight": "Low to medium indirect light, tolerates deep shade",
+    "soil": "Standard well-draining potting mix"
+  },
+  "Chinese Money Plant (Pilea peperomioides)": {
+    "water": "Water when top 2cm of soil is dry, let drain fully",
+    "sunlight": "Bright indirect light, rotate for even growth",
+    "soil": "Well-draining mix with perlite"
+  },
+  "Chinese evergreen (Aglaonema)": {
+    "water": "Water when top few cm are dry, tolerates some neglect",
+    "sunlight": "Low to medium indirect light",
+    "soil": "Well-draining peat-based potting mix"
+  },
+  "Christmas Cactus (Schlumbergera bridgesii)": {
+    "water": "Water when top 2cm is dry, reduce in winter after blooming",
+    "sunlight": "Bright indirect light, short days trigger blooming",
+    "soil": "Well-draining cactus mix with extra perlite"
+  },
+  "Chrysanthemum": {
+    "water": "Keep soil evenly moist, water at base to avoid leaf rot",
+    "sunlight": "Full sun, at least 6 hours direct light",
+    "soil": "Rich, well-draining potting mix with compost"
+  },
+  "Ctenanthe": {
+    "water": "Keep soil moist but not waterlogged, use filtered water",
+    "sunlight": "Medium indirect light, no direct sun",
+    "soil": "Well-draining peat-based mix with perlite"
+  },
+  "Daffodils (Narcissus spp.)": {
+    "water": "Keep soil moist during growing season, reduce after flowering",
+    "sunlight": "Full sun to partial shade",
+    "soil": "Well-draining, slightly acidic soil"
+  },
+  "Dracaena": {
+    "water": "Water when top half of soil is dry, sensitive to fluoride in tap water",
+    "sunlight": "Low to bright indirect light",
+    "soil": "Well-draining potting mix with peat"
+  },
+  "Dumb Cane (Dieffenbachia spp.)": {
+    "water": "Water when top 2cm of soil is dry, keep moderately moist",
+    "sunlight": "Medium to bright indirect light",
+    "soil": "Rich, well-draining peat-based mix"
+  },
+  "Elephant Ear (Alocasia spp.)": {
+    "water": "Keep soil consistently moist, high humidity preferred",
+    "sunlight": "Bright indirect light, no harsh direct sun",
+    "soil": "Rich, well-draining mix with perlite and peat"
+  },
+  "English Ivy (Hedera helix)": {
+    "water": "Keep soil evenly moist, let top layer dry slightly between waterings",
+    "sunlight": "Bright indirect light, tolerates some shade",
+    "soil": "Standard well-draining potting mix"
+  },
+  "Hyacinth (Hyacinthus orientalis)": {
+    "water": "Keep soil moist during growth, reduce after flowering",
+    "sunlight": "Full sun to partial shade",
+    "soil": "Well-draining, fertile soil"
+  },
+  "Iron Cross begonia (Begonia masoniana)": {
+    "water": "Water when top 2cm is dry, avoid wetting leaves",
+    "sunlight": "Bright indirect light, no direct sun",
+    "soil": "Light, well-draining mix with peat and perlite"
+  },
+  "Jade plant (Crassula ovata)": {
+    "water": "Every 2-3 weeks, let soil dry completely between waterings",
+    "sunlight": "Bright direct light, at least 4 hours of sun",
+    "soil": "Sandy, well-draining cactus/succulent mix"
+  },
+  "Kalanchoe": {
+    "water": "Water thoroughly then let soil dry completely, every 2-3 weeks",
+    "sunlight": "Bright direct or indirect light",
+    "soil": "Well-draining cactus/succulent mix"
+  },
+  "Lilium (Hemerocallis)": {
+    "water": "Keep soil evenly moist, about 2-3cm per week",
+    "sunlight": "Full sun to partial shade, at least 6 hours",
+    "soil": "Rich, well-draining soil with compost"
+  },
+  "Lily of the valley (Convallaria majalis)": {
+    "water": "Keep soil consistently moist, do not let dry out",
+    "sunlight": "Partial to full shade",
+    "soil": "Rich, moist, well-draining soil with organic matter"
+  },
+  "Money Tree (Pachira aquatica)": {
+    "water": "Water when top 3-4cm of soil is dry, every 1-2 weeks",
+    "sunlight": "Bright indirect light, tolerates medium light",
+    "soil": "Well-draining peat-based mix with perlite"
+  },
+  "Monstera Deliciosa (Monstera deliciosa)": {
+    "water": "Water every 1-2 weeks, let soil dry between waterings",
+    "sunlight": "Bright indirect light, tolerates medium light",
+    "soil": "Well-draining peat-based mix with perlite and bark"
+  },
+  "Orchid": {
+    "water": "Water once a week, let bark dry slightly between waterings",
+    "sunlight": "Bright indirect light, no direct sun",
+    "soil": "Orchid bark mix, not regular potting soil"
+  },
+  "Parlor Palm (Chamaedorea elegans)": {
+    "water": "Water when top 2-3cm of soil is dry, do not overwater",
+    "sunlight": "Low to medium indirect light, tolerates shade",
+    "soil": "Peat-based well-draining potting mix"
+  },
+  "Peace lily": {
+    "water": "Water when top 2cm is dry, will droop when thirsty",
+    "sunlight": "Low to medium indirect light, no direct sun",
+    "soil": "Rich, well-draining potting mix"
+  },
+  "Poinsettia (Euphorbia pulcherrima)": {
+    "water": "Water when top of soil feels dry, do not let sit in water",
+    "sunlight": "Bright indirect light, at least 6 hours",
+    "soil": "Well-draining peat-based potting mix"
+  },
+  "Polka Dot Plant (Hypoestes phyllostachya)": {
+    "water": "Keep soil evenly moist, mist for humidity",
+    "sunlight": "Bright indirect light for best color",
+    "soil": "Rich, well-draining potting mix"
+  },
+  "Ponytail Palm (Beaucarnea recurvata)": {
+    "water": "Every 2-3 weeks, stores water in trunk, very drought tolerant",
+    "sunlight": "Bright direct or indirect light",
+    "soil": "Fast-draining cactus/succulent mix"
+  },
+  "Pothos (Ivy arum)": {
+    "water": "Water when soil is dry, very forgiving if forgotten",
+    "sunlight": "Low to bright indirect light, very adaptable",
+    "soil": "Standard well-draining potting mix"
+  },
+  "Prayer Plant (Maranta leuconeura)": {
+    "water": "Keep soil moist but not soggy, use filtered water",
+    "sunlight": "Medium indirect light, no direct sun",
+    "soil": "Well-draining peat-based mix with perlite"
+  },
+  "Rattlesnake Plant (Calathea lancifolia)": {
+    "water": "Keep soil evenly moist, use filtered or rainwater",
+    "sunlight": "Medium indirect light, no direct sun",
+    "soil": "Well-draining peat-based mix with perlite"
+  },
+  "Rubber Plant (Ficus elastica)": {
+    "water": "Water when top 2-3cm of soil is dry, every 1-2 weeks",
+    "sunlight": "Bright indirect light, some direct morning sun is fine",
+    "soil": "Well-draining mix with peat, pine bark, and perlite"
+  },
+  "Sago Palm (Cycas revoluta)": {
+    "water": "Water when soil is mostly dry, drought tolerant",
+    "sunlight": "Bright indirect to direct light",
+    "soil": "Sandy, well-draining mix, slightly acidic"
+  },
+  "Schefflera": {
+    "water": "Water when top few cm of soil are dry, let drain fully",
+    "sunlight": "Bright indirect light, tolerates medium light",
+    "soil": "Rich, well-draining potting mix with perlite"
+  },
+  "Snake plant (Sanseviera)": {
+    "water": "Every 2-3 weeks, let soil dry completely between waterings",
+    "sunlight": "Low to bright indirect light, very adaptable",
+    "soil": "Well-draining cactus/succulent mix"
+  },
+  "Tradescantia": {
+    "water": "Water when top 2cm of soil is dry, keep slightly moist",
+    "sunlight": "Bright indirect light for best color",
+    "soil": "Standard well-draining potting mix"
+  },
+  "Tulip": {
+    "water": "Keep soil moist during growing season, do not overwater",
+    "sunlight": "Full sun, at least 6 hours direct light",
+    "soil": "Well-draining, fertile soil"
+  },
+  "Venus Flytrap": {
+    "water": "Keep soil wet, use only distilled or rainwater, no tap water",
+    "sunlight": "Full direct sun, at least 6 hours",
+    "soil": "Pure peat moss and perlite mix, no fertilizer"
+  },
+  "Yucca": {
+    "water": "Water every 1-2 weeks, let soil dry between waterings",
+    "sunlight": "Bright direct light, full sun preferred",
+    "soil": "Sandy, well-draining mix"
+  },
+  "ZZ Plant (Zamioculcas zamiifolia)": {
+    "water": "Every 2-3 weeks, very drought tolerant, let soil dry fully",
+    "sunlight": "Low to bright indirect light, very adaptable",
+    "soil": "Well-draining standard potting mix with perlite"
+  }
+}
