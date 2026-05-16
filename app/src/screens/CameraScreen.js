@@ -72,7 +72,7 @@ export default function CameraScreen({ navigation }) {
         name: "plant.jpg",
       });
 
-      const response = await fetch("http://192.168.0.138:8000/predict", {
+      const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/predict`, {
         method: "POST",
         body: formData,
       });
