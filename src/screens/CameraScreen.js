@@ -72,7 +72,7 @@ export default function CameraScreen({ navigation }) {
         name: "plant.jpg",
       });
 
-      const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/predict`, {
+      const response = await fetch("http://192.168.0.138:8000/predict", {
         method: "POST",
         body: formData,
       });
@@ -89,11 +89,7 @@ export default function CameraScreen({ navigation }) {
           confidence: result.confidence,
           image_url: photo,
           top_3: result.top_3,
-          care: {
-            water: "TODO — plant care API",
-            sunlight: "TODO — plant care API",
-            soil: "TODO — plant care API",
-          },
+          care: result.care,
         },
       });
     } catch (error) {
