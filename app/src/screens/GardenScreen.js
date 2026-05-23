@@ -11,6 +11,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { useFocusEffect } from "@react-navigation/native";
 import { supabase } from "../config/supabase";
+import { calcDropsFilled } from "../utils/waterInterval";
 
 export default function GardenScreen() {
   const [plants, setPlants] = useState([]);
@@ -52,6 +53,14 @@ export default function GardenScreen() {
     }, [])
   );
 
+  const handleWater = async (plantId) => {
+    const now = new Date().toISOString();
+    setPlants((prev) =>
+      prev.map((p) => (p.id === plantId ? { ...p, last_watered: now } : p))
+    );
+    await supabase.from("plants").update({ last_watered: now }).eq("id", plantId);
+  };
+
   const handleDelete = (plant) => {
     const displayName = plant.nickname || plant.name;
     Alert.alert("Delete Plant", `Remove ${displayName} from your garden?`, [
@@ -75,34 +84,50 @@ export default function GardenScreen() {
     ]);
   };
 
-  const renderPlant = ({ item }) => (
-    <TouchableOpacity
-      style={styles.plantCard}
-      onPress={() => navigation.navigate("PlantDetail", { plant: item })}
-      onLongPress={() => handleDelete(item)}
-    >
-      {item.signed_image_url ? (
-        <Image source={{ uri: item.signed_image_url }} style={styles.plantImage} />
-      ) : (
-        <View style={styles.plantImagePlaceholder}>
-          <Text style={styles.placeholderText}>No photo</Text>
-        </View>
-      )}
-      <View style={styles.plantInfo}>
-        {item.nickname && (
-          <Text style={styles.plantNickname} numberOfLines={1}>
-            {item.nickname}
-          </Text>
+  const renderPlant = ({ item }) => {
+    const drops = calcDropsFilled(item.last_watered, item.water_interval_days ?? 14);
+    return (
+      <TouchableOpacity
+        style={styles.plantCard}
+        onPress={() => navigation.navigate("PlantDetail", { plant: item })}
+        onLongPress={() => handleDelete(item)}
+      >
+        {item.signed_image_url ? (
+          <Image source={{ uri: item.signed_image_url }} style={styles.plantImage} />
+        ) : (
+          <View style={styles.plantImagePlaceholder}>
+            <Text style={styles.placeholderText}>No photo</Text>
+          </View>
         )}
-        <Text
-          style={item.nickname ? styles.plantSpecies : styles.plantName}
-          numberOfLines={1}
-        >
-          {item.name}
-        </Text>
-      </View>
-    </TouchableOpacity>
-  );
+        <View style={styles.plantInfo}>
+          {item.nickname && (
+            <Text style={styles.plantNickname} numberOfLines={1}>
+              {item.nickname}
+            </Text>
+          )}
+          <Text
+            style={item.nickname ? styles.plantSpecies : styles.plantName}
+            numberOfLines={1}
+          >
+            {item.name}
+          </Text>
+
+          <View style={styles.dropRow}>
+            {[0, 1, 2, 3, 4].map((i) => (
+              <View
+                key={i}
+                style={[styles.drop, i < drops ? styles.dropFilled : styles.dropEmpty]}
+              />
+            ))}
+          </View>
+
+          <TouchableOpacity style={styles.waterButton} onPress={() => handleWater(item.id)}>
+            <Text style={styles.waterButtonText}>💧 Water</Text>
+          </TouchableOpacity>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   const renderEmpty = () => (
     <View style={styles.emptyContainer}>
@@ -206,5 +231,38 @@ const styles = StyleSheet.create({
   },
   emptyList: {
     flex: 1,
+  },
+  dropRow: {
+    flexDirection: "row",
+    marginTop: 8,
+    marginBottom: 6,
+  },
+  drop: {
+    width: 12,
+    height: 16,
+    borderTopLeftRadius: 6,
+    borderTopRightRadius: 6,
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
+    marginRight: 4,
+  },
+  dropFilled: {
+    backgroundColor: "#4fc3f7",
+  },
+  dropEmpty: {
+    backgroundColor: "#dde8dd",
+  },
+  waterButton: {
+    backgroundColor: "#e8f5e9",
+    borderRadius: 8,
+    paddingVertical: 5,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#a8d5b5",
+  },
+  waterButtonText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#2d6a4f",
   },
 });

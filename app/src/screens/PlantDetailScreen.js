@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { supabase } from "../config/supabase";
 import { File } from "expo-file-system";
+import { parseWaterInterval } from "../utils/waterInterval";
 
 export default function PlantDetailScreen({ route, navigation }) {
   const [saving, setSaving] = useState(false);
@@ -84,6 +85,8 @@ export default function PlantDetailScreen({ route, navigation }) {
       care_sunlight: plant.care.sunlight,
       care_soil: plant.care.soil,
       image_url: imageUrl,
+      last_watered: new Date().toISOString(),
+      water_interval_days: parseWaterInterval(plant.care.water),
     });
 
     setSaving(false);
