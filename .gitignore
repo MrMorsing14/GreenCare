@@ -10,3 +10,5 @@ npm-debug.*
 *.orig.*
 web-build/
 .env
+/app/server/venv/
+/app/server/__pycache__/

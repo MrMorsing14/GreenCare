@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,38 +6,84 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  TextInput,
+  Image,
+  ScrollView,
 } from "react-native";
 import { supabase } from "../config/supabase";
+import { File } from "expo-file-system";
 
 export default function PlantDetailScreen({ route, navigation }) {
   const [saving, setSaving] = useState(false);
 
-  // Plant data comes from route.params after camera + API flow
   const plant = route?.params?.plant || {
     name: "Unknown Plant",
     confidence: 0,
-    care: {
-      water: "N/A",
-      sunlight: "N/A",
-      soil: "N/A",
-    },
+    care: { water: "N/A", sunlight: "N/A", soil: "N/A" },
   };
 
-  // If plant already has an id, it was loaded from the garden (already saved)
   const isAlreadySaved = !!plant.id;
+  const [nickname, setNickname] = useState("");
+  const [signedImageUrl, setSignedImageUrl] = useState(isAlreadySaved ? null : plant.image_url || null);
+
+  // For saved plants, generate a signed URL from the stored path
+  useEffect(() => {
+    if (isAlreadySaved && plant.image_url) {
+      supabase.storage
+        .from("plant-photos")
+        .createSignedUrl(plant.image_url, 60 * 60)
+        .then(({ data }) => {
+          if (data) setSignedImageUrl(data.signedUrl);
+        });
+    }
+  }, []);
+    
+  const uploadPhoto = async (userId, localUri) => {
+    try {
+      const file = new File(localUri);
+      const arrayBuffer = await file.arrayBuffer();
+
+      const fileName = `${userId}/${Date.now()}.jpg`;
+
+      const { data, error } = await supabase.storage
+        .from("plant-photos")
+        .upload(fileName, arrayBuffer, {
+          contentType: "image/jpeg",
+        });
+
+      if (error) throw error;
+
+      const { data: urlData } = await supabase.storage
+        .from("plant-photos")
+        .createSignedUrl(fileName, 60 * 60 * 24 * 365);
+
+      return fileName
+    } catch (err) {
+      console.log("Photo upload failed:", err.message);
+      return null;
+    }
+  };
 
   const handleSaveToGarden = async () => {
     setSaving(true);
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    let imageUrl = null;
+    if (plant.image_url) {
+      imageUrl = await uploadPhoto(user.id, plant.image_url);
+    }
 
     const { error } = await supabase.from("plants").insert({
       user_id: user.id,
       name: plant.name,
+      nickname: nickname.trim() || null,
       confidence: plant.confidence,
       care_water: plant.care.water,
       care_sunlight: plant.care.sunlight,
       care_soil: plant.care.soil,
-      image_url: plant.image_url || null,
+      image_url: imageUrl,
     });
 
     setSaving(false);
@@ -45,13 +91,13 @@ export default function PlantDetailScreen({ route, navigation }) {
     if (error) {
       Alert.alert("Error", "Failed to save plant: " + error.message);
     } else {
-      Alert.alert("Saved!", `${plant.name} has been added to your garden.`, [
+      const displayName = nickname.trim() || plant.name;
+      Alert.alert("Saved!", `${displayName} has been added to your garden.`, [
         { text: "OK", onPress: () => navigation.popToTop() },
       ]);
     }
   };
 
-  // For plants loaded from the garden, map the flat DB columns back to nested care object
   const care = plant.care || {
     water: plant.care_water || "N/A",
     sunlight: plant.care_sunlight || "N/A",
@@ -59,7 +105,11 @@ export default function PlantDetailScreen({ route, navigation }) {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      {signedImageUrl && (
+      <Image source={{ uri: signedImageUrl }} style={styles.plantImage} />
+      )}
+
       <View style={styles.header}>
         <Text style={styles.plantName}>{plant.name}</Text>
         {plant.confidence > 0 && (
@@ -89,17 +139,26 @@ export default function PlantDetailScreen({ route, navigation }) {
       </View>
 
       {!isAlreadySaved && (
-        <TouchableOpacity
-          style={styles.saveButton}
-          onPress={handleSaveToGarden}
-          disabled={saving}
-        >
-          {saving ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.saveButtonText}>Save to My Garden</Text>
-          )}
-        </TouchableOpacity>
+        <>
+          <TextInput
+            style={styles.nicknameInput}
+            placeholder="Give your plant a nickname (optional)"
+            value={nickname}
+            onChangeText={setNickname}
+          />
+
+          <TouchableOpacity
+            style={styles.saveButton}
+            onPress={handleSaveToGarden}
+            disabled={saving}
+          >
+            {saving ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.saveButtonText}>Save to My Garden</Text>
+            )}
+          </TouchableOpacity>
+        </>
       )}
 
       <TouchableOpacity
@@ -110,7 +169,7 @@ export default function PlantDetailScreen({ route, navigation }) {
           {isAlreadySaved ? "Back to Garden" : "Take Another Photo"}
         </Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -118,11 +177,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f0f7f0",
+  },
+  content: {
     paddingHorizontal: 20,
     paddingTop: 60,
+    paddingBottom: 40,
+  },
+  plantImage: {
+    width: "100%",
+    height: 220,
+    borderRadius: 16,
+    marginBottom: 20,
   },
   header: {
-    marginBottom: 30,
+    marginBottom: 20,
   },
   plantName: {
     fontSize: 32,
@@ -140,7 +208,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderWidth: 1,
     borderColor: "#d4e5d4",
-    marginBottom: 24,
+    marginBottom: 20,
   },
   sectionTitle: {
     fontSize: 20,
@@ -166,6 +234,15 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: "right",
     marginLeft: 16,
+  },
+  nicknameInput: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 16,
+    fontSize: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#d4e5d4",
   },
   saveButton: {
     backgroundColor: "#2d6a4f",

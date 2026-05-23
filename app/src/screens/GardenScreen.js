@@ -1,5 +1,13 @@
-import { useState, useEffect, useCallback } from "react";
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from "react-native";
+import { useState, useCallback } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  Alert,
+  Image,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useFocusEffect } from "@react-navigation/native";
 import { supabase } from "../config/supabase";
@@ -11,7 +19,9 @@ export default function GardenScreen() {
 
   const fetchPlants = async () => {
     setLoading(true);
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     const { data, error } = await supabase
       .from("plants")
@@ -20,12 +30,22 @@ export default function GardenScreen() {
       .order("created_at", { ascending: false });
 
     if (!error && data) {
-      setPlants(data);
+      const plantsWithUrls = await Promise.all(
+        data.map(async (plant) => {
+          if (plant.image_url) {
+            const { data: urlData } = await supabase.storage
+              .from("plant-photos")
+              .createSignedUrl(plant.image_url, 60 * 60);
+            return { ...plant, signed_image_url: urlData?.signedUrl || null };
+          }
+          return { ...plant, signed_image_url: null };
+        })
+      );
+      setPlants(plantsWithUrls);
     }
     setLoading(false);
   };
 
-  // Refetch when screen comes into focus (e.g. after saving a new plant)
   useFocusEffect(
     useCallback(() => {
       fetchPlants();
@@ -33,7 +53,8 @@ export default function GardenScreen() {
   );
 
   const handleDelete = (plant) => {
-    Alert.alert("Delete Plant", `Remove ${plant.name} from your garden?`, [
+    const displayName = plant.nickname || plant.name;
+    Alert.alert("Delete Plant", `Remove ${displayName} from your garden?`, [
       { text: "Cancel", style: "cancel" },
       {
         text: "Delete",
@@ -60,10 +81,26 @@ export default function GardenScreen() {
       onPress={() => navigation.navigate("PlantDetail", { plant: item })}
       onLongPress={() => handleDelete(item)}
     >
-      <Text style={styles.plantName}>{item.name}</Text>
-      <Text style={styles.plantDate}>
-        {new Date(item.created_at).toLocaleDateString()}
-      </Text>
+      {item.signed_image_url ? (
+        <Image source={{ uri: item.signed_image_url }} style={styles.plantImage} />
+      ) : (
+        <View style={styles.plantImagePlaceholder}>
+          <Text style={styles.placeholderText}>No photo</Text>
+        </View>
+      )}
+      <View style={styles.plantInfo}>
+        {item.nickname && (
+          <Text style={styles.plantNickname} numberOfLines={1}>
+            {item.nickname}
+          </Text>
+        )}
+        <Text
+          style={item.nickname ? styles.plantSpecies : styles.plantName}
+          numberOfLines={1}
+        >
+          {item.name}
+        </Text>
+      </View>
     </TouchableOpacity>
   );
 
@@ -84,6 +121,8 @@ export default function GardenScreen() {
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderPlant}
         ListEmptyComponent={renderEmpty}
+        numColumns={2}
+        columnWrapperStyle={styles.row}
         contentContainerStyle={plants.length === 0 && styles.emptyList}
         refreshing={loading}
         onRefresh={fetchPlants}
@@ -96,7 +135,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f0f7f0",
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingTop: 60,
   },
   title: {
@@ -104,24 +143,52 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#2d6a4f",
     marginBottom: 20,
+    paddingHorizontal: 4,
+  },
+  row: {
+    justifyContent: "space-between",
+    marginBottom: 12,
   },
   plantCard: {
     backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+    borderRadius: 16,
+    width: "48%",
     borderWidth: 1,
     borderColor: "#d4e5d4",
+    overflow: "hidden",
   },
-  plantName: {
-    fontSize: 18,
+  plantImage: {
+    width: "100%",
+    height: 140,
+  },
+  plantImagePlaceholder: {
+    width: "100%",
+    height: 140,
+    backgroundColor: "#e8f0e8",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  placeholderText: {
+    color: "#999",
+    fontSize: 13,
+  },
+  plantInfo: {
+    padding: 10,
+  },
+  plantNickname: {
+    fontSize: 16,
     fontWeight: "600",
     color: "#2d6a4f",
   },
-  plantDate: {
-    fontSize: 13,
-    color: "#888",
-    marginTop: 4,
+  plantSpecies: {
+    fontSize: 12,
+    color: "#6b8f71",
+    marginTop: 2,
+  },
+  plantName: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#2d6a4f",
   },
   emptyContainer: {
     alignItems: "center",
