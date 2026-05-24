@@ -7,10 +7,12 @@ import CameraScreen from "../screens/CameraScreen";
 import GardenScreen from "../screens/GardenScreen";
 import PlantDetailScreen from "../screens/PlantDetailScreen";
 
+//tab navigator for main app screens (Home, Camera, Garden)
 const Tab = createBottomTabNavigator();
+// stack navigator for screens pushed from main tabs (e.g. PlantDetail from Camera or Garden)
 const Stack = createNativeStackNavigator();
 
-// Camera flow has its own stack so we can push to PlantDetail after identification
+// camera flow: capture/identify → detail view
 function CameraStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -20,7 +22,7 @@ function CameraStack() {
   );
 }
 
-// Garden also needs detail view when tapping a saved plant
+// garden flow: list of saved plants → detail view
 function GardenStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>

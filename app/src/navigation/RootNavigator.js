@@ -9,13 +9,13 @@ export default function RootNavigator() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check current session on mount
+    // check for existing session on app load
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setLoading(false);
     });
 
-    // Listen for auth state changes (login, logout, token refresh)
+    // listen for auth changes (login/logout)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setSession(session);
@@ -25,8 +25,10 @@ export default function RootNavigator() {
     return () => subscription.unsubscribe();
   }, []);
 
+  //black screen while checking auth status
   if (loading) return null;
 
+  // Show auth screens if no session, otherwise show app
   return (
     <NavigationContainer>
       {session ? <AppNavigator /> : <AuthNavigator />}

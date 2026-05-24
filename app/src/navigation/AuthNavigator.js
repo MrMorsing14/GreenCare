@@ -5,6 +5,7 @@ import SignupScreen from "../screens/SignupScreen";
 const Stack = createNativeStackNavigator();
 
 export default function AuthNavigator() {
+  // stack navigator for authentication screens (login/signup)
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Login" component={LoginScreen} />
