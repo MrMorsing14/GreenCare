@@ -33,7 +33,7 @@ export default function LoginScreen({ navigation }) {
     if (error) {
       Alert.alert("Login Failed", error.message);
     }
-    // Navigation happens automatically via auth state listener in RootNavigator
+  
   };
 
   return (

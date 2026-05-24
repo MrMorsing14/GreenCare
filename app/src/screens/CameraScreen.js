@@ -18,11 +18,6 @@ export default function CameraScreen({ navigation }) {
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef(null);
 
-  // Permission not yet determined
-  if (!permission) {
-    return <View style={styles.container} />;
-  }
-
   // Permission denied
   if (!permission.granted) {
     return (
@@ -103,7 +98,7 @@ export default function CameraScreen({ navigation }) {
     setPhoto(null);
   };
 
-  // Photo taken — show preview with confirm/retake
+  
   if (photo) {
     return (
       <View style={styles.container}>
@@ -129,7 +124,7 @@ export default function CameraScreen({ navigation }) {
     );
   }
 
-  // Camera view
+ 
   return (
     <View style={styles.container}>
       <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
@@ -221,7 +216,7 @@ const styles = StyleSheet.create({
   placeholder: {
     width: 60,
   },
-  // Preview screen
+  // preview 
   preview: {
     flex: 1,
   },
@@ -255,7 +250,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
-  // Loading overlay
+  // loading
   loadingOverlay: {
     position: "absolute",
     top: 0,
@@ -271,7 +266,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 12,
   },
-  // Permission screen
+  // permission request
   permissionContainer: {
     flex: 1,
     backgroundColor: "#f0f7f0",
