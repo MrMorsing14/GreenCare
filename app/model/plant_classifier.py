@@ -20,19 +20,14 @@ from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping
 from tensorflow.keras.models import load_model
 from keras.preprocessing import image
 from matplotlib import pyplot as plt
-  # Enable DirectML fallback for AMD GPUs (optional, but can help with compatibility)
-# =============================================================================
-# STEP 1 — Verify GPU
-# =============================================================================
-print("TensorFlow version:", tf.__version__)
-print("GPU available:", tf.config.list_physical_devices('GPU'))
-# Should print: [PhysicalDevice(name='/physical_device:GPU:0', device_type='GPU')]
-# If it prints [] then TensorFlow can't see your GPU — check CUDA installation
 
-# =============================================================================
-# STEP 2 — Configuration
-# ⚠️ UPDATE THESE PATHS to where your dataset is on your machine
-# =============================================================================
+print("TensorFlow version:", tf.__version__)
+
+
+
+
+Configuration
+
 SOURCE_DATASET = 'C:\\Users\\frede\\Documents\\vscodeSchoo\\house_plant_species'
 SPLIT_DATASET  = 'C:\\Users\\frede\\Documents\\vscodeSchoo\\house_plant_species_split'
 SAVE_PATH      = 'C:\\Users\\frede\\Documents\\vscodeSchoo\\plant_app\\best_model.keras'
@@ -43,15 +38,13 @@ color       = 'rgb'      # color images
 classMode   = 'categorical'  # multi-class (47 plants)
 batch_size  = 32
 
-# Training settings
+
 epochs        = 30
 learning_rate = 0.001
 
-# =============================================================================
-# STEP 3 — Split dataset into train/val (80/20)
-# Only run this ONCE — it copies images into a new folder structure
-# Comment out this block after first run
-# =============================================================================
+
+# Split dataset into train/val (80/20)
+
 def split_dataset(source, dest, split=0.8):
     if os.path.exists(dest):
         print(f'Split folder already exists at {dest} — skipping split.')
@@ -75,18 +68,15 @@ def split_dataset(source, dest, split=0.8):
             for img in split_imgs:
                 shutil.copy(os.path.join(class_path, img), os.path.join(out_dir, img))
 
-    print('Split done!')
+    print('Split done. Train and validation folders created at:', dest)
 
 split_dataset(SOURCE_DATASET, SPLIT_DATASET)
 
 trainingFiles   = os.path.join(SPLIT_DATASET, 'train')
 validationFiles = os.path.join(SPLIT_DATASET, 'val')
 
-# =============================================================================
-# STEP 4 — ImageDataGenerator (Data Augmentation)
-# Same concept as professor's example — distort/zoom/rotate to reduce overfitting
-# preprocess_input replaces rescale=1./255 — MobileNetV2 expects pixels in range -1 to 1
-# =============================================================================
+
+#Data Augmentation
 train_datagen = ImageDataGenerator(
     preprocessing_function=preprocess_input,  # MobileNetV2 specific — replaces rescale=1./255
     shear_range=0.2,        # distort the image sideways
@@ -121,22 +111,9 @@ num_classes = len(training_set.class_indices)
 print('Classes found:', training_set.class_indices)
 print('Number of classes:', num_classes)
 
-# =============================================================================
-# STEP 5 — Build the Model (MobileNetV2 Transfer Learning)
-# MobileNetV2 is pretrained on ImageNet — it already knows edges, shapes, textures
-# We freeze it and add our own classifier on top (same style as professor's Dense layers)
-#
-# Structure:
-#   MobileNetV2 (frozen)         ← already knows how to see
-#       ↓
-#   GlobalAveragePooling2D       ← our layer
-#       ↓
-#   Dense(128, relu)             ← our layer
-#       ↓
-#   Dropout(0.3)                 ← our layer
-#       ↓
-#   Dense(47, softmax)           ← our output layer — one per plant
-# =============================================================================
+
+# MobileNetV2 Transfer Learning
+
 with tf.device('/CPU:0'):
     base_model = MobileNetV2(input_shape=(224, 224, 3), include_top=False, weights='imagenet')
     base_model.trainable = False
@@ -157,10 +134,9 @@ model.compile(
 )
 model.summary()
 
-# =============================================================================
-# STEP 6 — Train the Model
-# Same as professor's model.fit() — added checkpoint and early stopping
-# =============================================================================
+
+# Train the Model
+
 os.makedirs(os.path.dirname(SAVE_PATH), exist_ok=True)
 
 checkpoint = ModelCheckpoint(
@@ -184,17 +160,16 @@ history = model.fit(
     callbacks=[checkpoint, early_stop]
 )
 
-# =============================================================================
-# STEP 7 — Evaluate the Model
-# Same as professor's model.evaluate(test_set)
-# =============================================================================
+
+# Evaluate the model
+
 loss, accuracy = model.evaluate(test_set)
 print(f'\nValidation Loss:     {loss:.4f}')
 print(f'Validation Accuracy: {accuracy*100:.2f}%')
 
-# =============================================================================
-# STEP 8 — Plot Training History
-# =============================================================================
+
+# Training History
+
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
 
 ax1.plot(history.history['accuracy'], label='Training Accuracy')
@@ -216,11 +191,9 @@ ax2.grid(True)
 plt.tight_layout()
 plt.show()
 
-# =============================================================================
-# STEP 9 — Single Image Prediction
-# Same approach as professor's example — load, preprocess, predict
-# ⚠️ UPDATE singlePred to a plant image on your machine
-# =============================================================================
+
+# Single Image Prediction
+
 class_labels = {v: k for k, v in training_set.class_indices.items()}
 print('Class label map:', class_labels)
 
@@ -250,9 +223,8 @@ plt.title(f'Prediction: {predicted_plant} ({confidence:.1f}%)')
 plt.axis('off')
 plt.show()
 
-# =============================================================================
-# STEP 10 — Export to TFLite for Expo App
-# =============================================================================
+# Export to TFLite 
+
 converter   = tf.lite.TFLiteConverter.from_keras_model(model)
 tflite_model = converter.convert()
 
@@ -260,6 +232,3 @@ tflite_path = os.path.join(os.path.dirname(SAVE_PATH), 'plant_model.tflite')
 with open(tflite_path, 'wb') as f:
     f.write(tflite_model)
 
-print('TFLite model saved to:', tflite_path)
-print('Class labels saved to:', labels_path)
-print('\nBoth files are ready for your Expo app!')
