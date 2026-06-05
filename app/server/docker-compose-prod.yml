@@ -1,6 +1,6 @@
 # Production stack. The api image is built/pushed by CI and pulled here.
-# Variables (IMAGE_TAG, GHCR_OWNER, DOMAIN) come from the .env file the
-# deploy workflow writes next to this file on the server.
+# IMAGE_TAG and GHCR_OWNER come from the .env file the deploy workflow writes
+# next to this file on the server.
 services:
   api:
     image: ghcr.io/${GHCR_OWNER}/greencare-api:${IMAGE_TAG}
@@ -23,25 +23,10 @@ services:
       - api
     ports:
       - "80:80"
-      - "443:443"
-    environment:
-      - DOMAIN=${DOMAIN}
     volumes:
-      - ./nginx/templates:/etc/nginx/templates:ro
-      - ./nginx/99-autoreload.sh:/docker-entrypoint.d/99-autoreload.sh:ro
-      - ./certbot/conf:/etc/letsencrypt:ro
-      - ./certbot/www:/var/www/certbot:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
     networks:
       - greencare
-
-  certbot:
-    image: certbot/certbot
-    restart: unless-stopped
-    volumes:
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-    # Renew every 12h
-    entrypoint: /bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done'
 
 networks:
   greencare:
