@@ -18,6 +18,15 @@ export default function CameraScreen({ navigation }) {
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef(null);
 
+ 
+  if (!permission) {
+    return (
+      <View style={styles.permissionContainer}>
+        <ActivityIndicator size="large" color="#2d6a4f" />
+      </View>
+    );
+  }
+
   // Permission denied
   if (!permission.granted) {
     return (
