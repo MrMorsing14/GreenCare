@@ -19,6 +19,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Debug SSH setup
+        run: |
+            echo "known_hosts contents:"
+            cat ~/.ssh/known_hosts
+            echo ""
+            echo "known_hosts line count: $(wc -l < ~/.ssh/known_hosts)"
+
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
