@@ -19,13 +19,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Debug SSH setup
-        run: |
-            echo "known_hosts contents:"
-            cat ~/.ssh/known_hosts
-            echo ""
-            echo "known_hosts line count: $(wc -l < ~/.ssh/known_hosts)"
-
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
@@ -33,6 +26,13 @@ jobs:
           chmod 600 ~/.ssh/ssh_key
           printf '%s\n' "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
+
+      - name: Debug SSH setup
+        run: |
+            echo "known_hosts contents:"
+            cat ~/.ssh/known_hosts
+            echo ""
+            echo "known_hosts line count: $(wc -l < ~/.ssh/known_hosts)"
 
       - name: Ensure remote directories exist
         env:
