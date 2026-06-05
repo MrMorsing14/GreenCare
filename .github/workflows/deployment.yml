@@ -27,20 +27,13 @@ jobs:
             echo "${{ secrets.SSH_KNOWN_HOSTS }}" | base64 -d > ~/.ssh/known_hosts
             chmod 644 ~/.ssh/known_hosts
 
-      - name: Debug SSH setup
-        run: |
-            echo "known_hosts contents:"
-            cat ~/.ssh/known_hosts
-            echo ""
-            echo "known_hosts line count: $(wc -l < ~/.ssh/known_hosts)"
-
       - name: Ensure remote directories exist
         env:
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_HOST: ${{ secrets.SSH_HOST }}
         run: |
           ssh -i ~/.ssh/ssh_key "$SSH_USER@$SSH_HOST" \
-            "mkdir -p ~/$REMOTE_DIR/nginx/templates ~/$REMOTE_DIR/certbot/www ~/$REMOTE_DIR/certbot/conf"
+            "mkdir -p ~/$REMOTE_DIR/nginx/conf.d"
 
       - name: Transfer docker-compose to server
         env:
@@ -51,35 +44,23 @@ jobs:
             app/server/docker-compose-prod.yml \
             "$SSH_USER@$SSH_HOST:~/$REMOTE_DIR/docker-compose.yml"
 
-      - name: Transfer nginx config and scripts to server
+      - name: Transfer nginx config to server
         env:
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_HOST: ${{ secrets.SSH_HOST }}
         run: |
           scp -i ~/.ssh/ssh_key \
-            app/server/nginx/templates/greencare.conf.template \
-            "$SSH_USER@$SSH_HOST:~/$REMOTE_DIR/nginx/templates/"
-          scp -i ~/.ssh/ssh_key \
-            app/server/nginx/99-autoreload.sh \
-            "$SSH_USER@$SSH_HOST:~/$REMOTE_DIR/nginx/"
-          scp -i ~/.ssh/ssh_key \
-            app/server/init-letsencrypt.sh \
-            "$SSH_USER@$SSH_HOST:~/$REMOTE_DIR/"
-          ssh -i ~/.ssh/ssh_key "$SSH_USER@$SSH_HOST" \
-            "chmod +x ~/$REMOTE_DIR/init-letsencrypt.sh ~/$REMOTE_DIR/nginx/99-autoreload.sh"
+            app/server/nginx/conf.d/greencare.conf \
+            "$SSH_USER@$SSH_HOST:~/$REMOTE_DIR/nginx/conf.d/"
 
       - name: Create .env file
         env:
           IMAGE_TAG: ${{ github.event.workflow_run.head_sha }}
-          DOMAIN: ${{ secrets.APP_DOMAIN }}
-          LETSENCRYPT_EMAIL: ${{ secrets.LETSENCRYPT_EMAIL }}
         run: |
           umask 077
           {
-            printf 'IMAGE_TAG=%s\n'         "$IMAGE_TAG"
-            printf 'GHCR_OWNER=%s\n'        "mrmorsing14"
-            printf 'DOMAIN=%s\n'            "$DOMAIN"
-            printf 'LETSENCRYPT_EMAIL=%s\n' "$LETSENCRYPT_EMAIL"
+            printf 'IMAGE_TAG=%s\n'  "$IMAGE_TAG"
+            printf 'GHCR_OWNER=%s\n' "mrmorsing14"
           } > .env
 
       - name: Transfer .env to server
@@ -93,7 +74,6 @@ jobs:
         env:
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_HOST: ${{ secrets.SSH_HOST }}
-          DOMAIN: ${{ secrets.APP_DOMAIN }}
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GHCR_USER: ${{ github.actor }}
         run: |
@@ -101,9 +81,6 @@ jobs:
           set -euo pipefail
           cd ~/$REMOTE_DIR
           echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
-          if [ ! -d "certbot/conf/live/$DOMAIN" ]; then
-            ./init-letsencrypt.sh
-          fi
           docker compose pull
           docker compose up -d --remove-orphans
           docker image prune -f
