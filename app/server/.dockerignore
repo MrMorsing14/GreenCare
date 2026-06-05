@@ -1,0 +1,25 @@
+# Python virtual env & caches
+venv/
+__pycache__/
+*.pyc
+
+# Dev / training artifacts not needed at runtime
+evaluate.py
+predict.py
+*.png
+
+# Project noise
+node_modules/
+.git/
+.gitignore
+*.md
+
+# Deployment files (not part of the image build context)
+Dockerfile
+.dockerignore
+docker-compose.yml
+init-letsencrypt.sh
+.env
+.env.example
+nginx/
+certbot/

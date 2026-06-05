@@ -3,24 +3,19 @@ GreenCare Plant Identification API
 Run: uvicorn server:app --host 0.0.0.0 --port 8000
 """
 
-import os
 import json
 import numpy as np
 from io import BytesIO
 from PIL import Image
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-
-os.environ['TF_DIRECTML_KERNEL_FALLBACK'] = '1'
 import tensorflow as tf
-tf.config.set_visible_devices([], 'GPU')
-from tensorflow.keras.models import load_model
 from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 
 # =============================================================================
-# Config — update these paths to match your machine
+# Config
 # =============================================================================
-MODEL_PATH = "best_model.keras"
+MODEL_PATH = "plant_model.tflite"
 LABELS_PATH = "class_labels.json"
 CARE_PATH = "plant_care.json"
 
@@ -28,7 +23,10 @@ CARE_PATH = "plant_care.json"
 # Load model, labels, and care data once at startup
 # =============================================================================
 print("Loading model...")
-model = load_model(MODEL_PATH)
+interpreter = tf.lite.Interpreter(model_path=MODEL_PATH)
+interpreter.allocate_tensors()
+input_details = interpreter.get_input_details()
+output_details = interpreter.get_output_details()
 print("Model loaded!")
 
 with open(LABELS_PATH, "r") as f:
@@ -61,7 +59,7 @@ async def predict(file: UploadFile = File(...)):
     if not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="File must be an image")
 
-    # Read and preprocess image — same as predict.py
+    # Read and preprocess image — same as predict.py / evaluate.py
     contents = await file.read()
     img = Image.open(BytesIO(contents)).convert("RGB")
     img = img.resize((224, 224))
@@ -69,8 +67,11 @@ async def predict(file: UploadFile = File(...)):
     img_array = np.expand_dims(img_array, axis=0)
     img_array = preprocess_input(img_array)
 
-    # Predict
-    result = model.predict(img_array)
+    # Run TFLite inference
+    interpreter.set_tensor(input_details[0]["index"], img_array)
+    interpreter.invoke()
+    result = interpreter.get_tensor(output_details[0]["index"])
+
     predicted_index = int(np.argmax(result[0]))
     predicted_plant = class_labels[str(predicted_index)]
     confidence = float(result[0][predicted_index])

@@ -1,0 +1,105 @@
+name: CD - Deploy
+
+on:
+  workflow_run:
+    workflows: ["CD - Delivery"]
+    types: [completed]
+
+env:
+  REMOTE_DIR: greencare-server
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # Only deploy if the Delivery build actually succeeded
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/ssh_key
+          chmod 600 ~/.ssh/ssh_key
+          printf '%s\n' "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Ensure remote directories exist
+        env:
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+        run: |
+          ssh -i ~/.ssh/ssh_key "$SSH_USER@$SSH_HOST" \
+            "mkdir -p ~/$REMOTE_DIR/nginx/templates ~/$REMOTE_DIR/certbot/www ~/$REMOTE_DIR/certbot/conf"
+
+      - name: Transfer docker-compose to server
+        env:
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+        run: |
+          scp -i ~/.ssh/ssh_key \
+            app/server/docker-compose-prod.yml \
+            "$SSH_USER@$SSH_HOST:~/$REMOTE_DIR/docker-compose.yml"
+
+      - name: Transfer nginx config and scripts to server
+        env:
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+        run: |
+          scp -i ~/.ssh/ssh_key \
+            app/server/nginx/templates/greencare.conf.template \
+            "$SSH_USER@$SSH_HOST:~/$REMOTE_DIR/nginx/templates/"
+          scp -i ~/.ssh/ssh_key \
+            app/server/nginx/99-autoreload.sh \
+            "$SSH_USER@$SSH_HOST:~/$REMOTE_DIR/nginx/"
+          scp -i ~/.ssh/ssh_key \
+            app/server/init-letsencrypt.sh \
+            "$SSH_USER@$SSH_HOST:~/$REMOTE_DIR/"
+          ssh -i ~/.ssh/ssh_key "$SSH_USER@$SSH_HOST" \
+            "chmod +x ~/$REMOTE_DIR/init-letsencrypt.sh ~/$REMOTE_DIR/nginx/99-autoreload.sh"
+
+      - name: Create .env file
+        env:
+          IMAGE_TAG: ${{ github.event.workflow_run.head_sha }}
+          DOMAIN: ${{ secrets.APP_DOMAIN }}
+          LETSENCRYPT_EMAIL: ${{ secrets.LETSENCRYPT_EMAIL }}
+        run: |
+          umask 077
+          owner="${GITHUB_REPOSITORY_OWNER,,}"
+          {
+            printf 'IMAGE_TAG=%s\n'         "$IMAGE_TAG"
+            printf 'GHCR_OWNER=%s\n'        "$owner"
+            printf 'DOMAIN=%s\n'            "$DOMAIN"
+            printf 'LETSENCRYPT_EMAIL=%s\n' "$LETSENCRYPT_EMAIL"
+          } > .env
+
+      - name: Transfer .env to server
+        env:
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+        run: |
+          scp -i ~/.ssh/ssh_key .env "$SSH_USER@$SSH_HOST:~/$REMOTE_DIR/.env"
+
+      - name: Pull image and (re)deploy
+        env:
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          DOMAIN: ${{ secrets.APP_DOMAIN }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHCR_USER: ${{ github.actor }}
+        run: |
+          ssh -i ~/.ssh/ssh_key "$SSH_USER@$SSH_HOST" bash -s <<EOF
+          set -euo pipefail
+          cd ~/$REMOTE_DIR
+          echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
+          # First-run TLS bootstrap (needs DNS for \$DOMAIN already pointing here)
+          if [ ! -d "certbot/conf/live/$DOMAIN" ]; then
+            ./init-letsencrypt.sh
+          fi
+          docker compose pull
+          docker compose up -d --remove-orphans
+          docker image prune -f
+          EOF

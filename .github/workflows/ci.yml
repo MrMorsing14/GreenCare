@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches-ignore: [ main ]
+
+jobs:
+  build-and-smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build API image
+        run: docker build -t greencare-api:ci app/server
+
+      - name: Start container
+        run: docker run -d --name greencare-ci -p 8000:8000 greencare-api:ci
+
+      - name: Wait for /health
+        run: |
+          for i in $(seq 1 40); do
+            if curl -fsS http://localhost:8000/health; then echo; echo "healthy"; exit 0; fi
+            sleep 3
+          done
+          echo "health check failed"; docker logs greencare-ci; exit 1
+
+      - name: Smoke-test /predict
+        run: |
+          python3 -m pip install --quiet pillow
+          python3 -c "from PIL import Image; Image.new('RGB', (224, 224), (34, 139, 34)).save('plant.jpg')"
+          curl -fsS -F "file=@plant.jpg" http://localhost:8000/predict | tee response.json
+          grep -q '"prediction"' response.json
+
+      - name: Container logs
+        if: failure()
+        run: docker logs greencare-ci
+
+      - name: Cleanup
+        if: always()
+        run: docker rm -f greencare-ci || true

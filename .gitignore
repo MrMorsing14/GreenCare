@@ -12,3 +12,4 @@ web-build/
 .env
 /app/server/venv/
 /app/server/__pycache__/
+/app/server/certbot/
