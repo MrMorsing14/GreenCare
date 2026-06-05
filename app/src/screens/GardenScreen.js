@@ -4,10 +4,10 @@ import {
   Text,
   StyleSheet,
   FlatList,
-  TouchableOpacity,
+  Pressable,
   Alert,
-  Image,
 } from "react-native";
+import { Image } from "expo-image";
 import { useNavigation } from "@react-navigation/native";
 import { useFocusEffect } from "@react-navigation/native";
 import { supabase } from "../config/supabase";
@@ -87,8 +87,8 @@ export default function GardenScreen() {
   const renderPlant = ({ item }) => {
     const drops = calcDropsFilled(item.last_watered, item.water_interval_days ?? 14);
     return (
-      <TouchableOpacity
-        style={styles.plantCard}
+      <Pressable
+        style={({ pressed }) => [styles.plantCard, pressed && { opacity: 0.7 }]}
         onPress={() => navigation.navigate("PlantDetail", { plant: item })}
         onLongPress={() => handleDelete(item)}
       >
@@ -121,11 +121,14 @@ export default function GardenScreen() {
             ))}
           </View>
 
-          <TouchableOpacity style={styles.waterButton} onPress={() => handleWater(item.id)}>
+          <Pressable
+            style={({ pressed }) => [styles.waterButton, pressed && { opacity: 0.7 }]}
+            onPress={() => handleWater(item.id)}
+          >
             <Text style={styles.waterButtonText}>💧 Water</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
-      </TouchableOpacity>
+      </Pressable>
     );
   };
 

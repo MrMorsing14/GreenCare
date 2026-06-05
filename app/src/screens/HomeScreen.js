@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
   Modal,
   Pressable,
   Alert,
@@ -32,9 +31,12 @@ export default function HomeScreen() {
     <View style={styles.container}>
       <View style={styles.topBar}>
         <Text style={styles.title}>Welcome to GreenCare</Text>
-        <TouchableOpacity onPress={() => setSidebarVisible(true)}>
+        <Pressable
+          onPress={() => setSidebarVisible(true)}
+          style={({ pressed }) => pressed && { opacity: 0.7 }}
+        >
           <Ionicons name="settings-outline" size={26} color="#2d6a4f" />
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       <Text style={styles.description}>
@@ -62,15 +64,21 @@ export default function HomeScreen() {
           <View style={styles.sidebar}>
             <View style={styles.sidebarHeader}>
               <Text style={styles.sidebarTitle}>Settings</Text>
-              <TouchableOpacity onPress={() => setSidebarVisible(false)}>
+              <Pressable
+                onPress={() => setSidebarVisible(false)}
+                style={({ pressed }) => pressed && { opacity: 0.7 }}
+              >
                 <Ionicons name="close" size={24} color="#333" />
-              </TouchableOpacity>
+              </Pressable>
             </View>
 
-            <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
+            <Pressable
+              style={({ pressed }) => [styles.menuItem, pressed && { opacity: 0.7 }]}
+              onPress={handleLogout}
+            >
               <Ionicons name="log-out-outline" size={22} color="#d32f2f" />
               <Text style={styles.menuItemTextDanger}>Log Out</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </Pressable>
       </Modal>
