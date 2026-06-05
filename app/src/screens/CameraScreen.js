@@ -3,11 +3,11 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
-  Image,
+  Pressable,
   Alert,
   ActivityIndicator,
 } from "react-native";
+import { Image } from "expo-image";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 
@@ -34,9 +34,12 @@ export default function CameraScreen({ navigation }) {
         <Text style={styles.permissionText}>
           We need camera access to identify your plants
         </Text>
-        <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
+        <Pressable
+          style={({ pressed }) => [styles.permissionButton, pressed && { opacity: 0.7 }]}
+          onPress={requestPermission}
+        >
           <Text style={styles.permissionButtonText}>Grant Permission</Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     );
   }
@@ -120,13 +123,19 @@ export default function CameraScreen({ navigation }) {
           </View>
         ) : (
           <View style={styles.previewActions}>
-            <TouchableOpacity style={styles.retakeButton} onPress={handleRetake}>
+            <Pressable
+              style={({ pressed }) => [styles.retakeButton, pressed && { opacity: 0.7 }]}
+              onPress={handleRetake}
+            >
               <Text style={styles.retakeText}>Retake</Text>
-            </TouchableOpacity>
+            </Pressable>
 
-            <TouchableOpacity style={styles.identifyButton} onPress={handleIdentify}>
+            <Pressable
+              style={({ pressed }) => [styles.identifyButton, pressed && { opacity: 0.7 }]}
+              onPress={handleIdentify}
+            >
               <Text style={styles.identifyText}>Identify Plant</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         )}
       </View>
@@ -138,22 +147,28 @@ export default function CameraScreen({ navigation }) {
     <View style={styles.container}>
       <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
         <View style={styles.topBar}>
-          <TouchableOpacity
-            style={styles.flipButton}
+          <Pressable
+            style={({ pressed }) => [styles.flipButton, pressed && { opacity: 0.7 }]}
             onPress={() => setFacing(facing === "back" ? "front" : "back")}
           >
             <Text style={styles.flipText}>Flip</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
 
         <View style={styles.bottomBar}>
-          <TouchableOpacity style={styles.galleryButton} onPress={handlePickImage}>
+          <Pressable
+            style={({ pressed }) => [styles.galleryButton, pressed && { opacity: 0.7 }]}
+            onPress={handlePickImage}
+          >
             <Text style={styles.galleryText}>Gallery</Text>
-          </TouchableOpacity>
+          </Pressable>
 
-          <TouchableOpacity style={styles.captureButton} onPress={handleTakePhoto}>
+          <Pressable
+            style={({ pressed }) => [styles.captureButton, pressed && { opacity: 0.7 }]}
+            onPress={handleTakePhoto}
+          >
             <View style={styles.captureInner} />
-          </TouchableOpacity>
+          </Pressable>
 
           <View style={styles.placeholder} />
         </View>

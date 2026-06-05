@@ -3,13 +3,13 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
+  Pressable,
   Alert,
   ActivityIndicator,
   TextInput,
-  Image,
   ScrollView,
 } from "react-native";
+import { Image } from "expo-image";
 import { supabase } from "../config/supabase";
 import { File } from "expo-file-system";
 import { parseWaterInterval } from "../utils/waterInterval";
@@ -150,8 +150,8 @@ export default function PlantDetailScreen({ route, navigation }) {
             onChangeText={setNickname}
           />
 
-          <TouchableOpacity
-            style={styles.saveButton}
+          <Pressable
+            style={({ pressed }) => [styles.saveButton, pressed && { opacity: 0.7 }]}
             onPress={handleSaveToGarden}
             disabled={saving}
           >
@@ -160,18 +160,18 @@ export default function PlantDetailScreen({ route, navigation }) {
             ) : (
               <Text style={styles.saveButtonText}>Save to My Garden</Text>
             )}
-          </TouchableOpacity>
+          </Pressable>
         </>
       )}
 
-      <TouchableOpacity
-        style={styles.retakeButton}
+      <Pressable
+        style={({ pressed }) => [styles.retakeButton, pressed && { opacity: 0.7 }]}
         onPress={() => navigation.goBack()}
       >
         <Text style={styles.retakeText}>
           {isAlreadySaved ? "Back to Garden" : "Take Another Photo"}
         </Text>
-      </TouchableOpacity>
+      </Pressable>
     </ScrollView>
   );
 }
