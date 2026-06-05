@@ -2,20 +2,19 @@ name: CD - Delivery
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
+
+env:
+  IMAGE: ghcr.io/mrmorsing14/greencare-api
 
 jobs:
-  build:
+  delivery:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
     steps:
       - uses: actions/checkout@v4
-
-      - name: Lowercase image owner
-        id: vars
-        run: echo "owner=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
 
       - name: Log in to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
@@ -29,7 +28,7 @@ jobs:
           context: app/server
           push: true
           tags: |
-            ghcr.io/${{ steps.vars.outputs.owner }}/greencare-api:${{ github.sha }}
-            ghcr.io/${{ steps.vars.outputs.owner }}/greencare-api:latest
+            ${{ env.IMAGE }}:${{ github.sha }}
+            ${{ env.IMAGE }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
