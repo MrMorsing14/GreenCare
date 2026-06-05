@@ -21,11 +21,11 @@ jobs:
 
       - name: Setup SSH
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/ssh_key
-          chmod 600 ~/.ssh/ssh_key
-          printf '%s\n' "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
-          chmod 644 ~/.ssh/known_hosts
+            mkdir -p ~/.ssh
+            echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/ssh_key
+            chmod 600 ~/.ssh/ssh_key
+            echo "${{ secrets.SSH_KNOWN_HOSTS }}" | base64 -d > ~/.ssh/known_hosts
+            chmod 644 ~/.ssh/known_hosts
 
       - name: Debug SSH setup
         run: |
