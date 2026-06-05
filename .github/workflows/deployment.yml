@@ -1,9 +1,10 @@
 name: CD - Deploy
-
+#test
 on:
   workflow_run:
     workflows: ["CD - Delivery"]
     types: [completed]
+    branches: [main]
 
 env:
   REMOTE_DIR: greencare-server
@@ -11,7 +12,6 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    # Only deploy if the Delivery build actually succeeded
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     permissions:
       contents: read
@@ -68,10 +68,9 @@ jobs:
           LETSENCRYPT_EMAIL: ${{ secrets.LETSENCRYPT_EMAIL }}
         run: |
           umask 077
-          owner="${GITHUB_REPOSITORY_OWNER,,}"
           {
             printf 'IMAGE_TAG=%s\n'         "$IMAGE_TAG"
-            printf 'GHCR_OWNER=%s\n'        "$owner"
+            printf 'GHCR_OWNER=%s\n'        "mrmorsing14"
             printf 'DOMAIN=%s\n'            "$DOMAIN"
             printf 'LETSENCRYPT_EMAIL=%s\n' "$LETSENCRYPT_EMAIL"
           } > .env
@@ -95,7 +94,6 @@ jobs:
           set -euo pipefail
           cd ~/$REMOTE_DIR
           echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
-          # First-run TLS bootstrap (needs DNS for \$DOMAIN already pointing here)
           if [ ! -d "certbot/conf/live/$DOMAIN" ]; then
             ./init-letsencrypt.sh
           fi
