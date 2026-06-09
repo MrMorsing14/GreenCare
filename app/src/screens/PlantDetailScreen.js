@@ -25,7 +25,9 @@ export default function PlantDetailScreen({ route, navigation }) {
 
   const isAlreadySaved = !!plant.id;
   const [nickname, setNickname] = useState("");
-  const [signedImageUrl, setSignedImageUrl] = useState(isAlreadySaved ? null : plant.image_url || null);
+  const [signedImageUrl, setSignedImageUrl] = useState(
+    isAlreadySaved ? null : plant.image_url || null,
+  );
 
   // For saved plants, generate a signed URL from the stored path
   useEffect(() => {
@@ -38,7 +40,7 @@ export default function PlantDetailScreen({ route, navigation }) {
         });
     }
   }, []);
-    
+
   const uploadPhoto = async (userId, localUri) => {
     try {
       const file = new File(localUri);
@@ -58,7 +60,7 @@ export default function PlantDetailScreen({ route, navigation }) {
         .from("plant-photos")
         .createSignedUrl(fileName, 60 * 60 * 24 * 365);
 
-      return fileName
+      return fileName;
     } catch (err) {
       console.log("Photo upload failed:", err.message);
       return null;
@@ -110,7 +112,7 @@ export default function PlantDetailScreen({ route, navigation }) {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {signedImageUrl && (
-      <Image source={{ uri: signedImageUrl }} style={styles.plantImage} />
+        <Image source={{ uri: signedImageUrl }} style={styles.plantImage} />
       )}
 
       <View style={styles.header}>
@@ -121,6 +123,20 @@ export default function PlantDetailScreen({ route, navigation }) {
           </Text>
         )}
       </View>
+
+      {plant.top_3 && plant.top_3.length > 1 && (
+        <View style={styles.careSection}>
+          <Text style={styles.sectionTitle}>Top Predictions</Text>
+          {plant.top_3.map((pred, index) => (
+            <View key={index} style={styles.careItem}>
+              <Text style={styles.careLabel}>{pred.name}</Text>
+              <Text style={styles.careValue}>
+                {Math.round(pred.confidence * 100)}%
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
 
       <View style={styles.careSection}>
         <Text style={styles.sectionTitle}>Care Instructions</Text>
@@ -151,7 +167,10 @@ export default function PlantDetailScreen({ route, navigation }) {
           />
 
           <Pressable
-            style={({ pressed }) => [styles.saveButton, pressed && { opacity: 0.7 }]}
+            style={({ pressed }) => [
+              styles.saveButton,
+              pressed && { opacity: 0.7 },
+            ]}
             onPress={handleSaveToGarden}
             disabled={saving}
           >
@@ -165,7 +184,10 @@ export default function PlantDetailScreen({ route, navigation }) {
       )}
 
       <Pressable
-        style={({ pressed }) => [styles.retakeButton, pressed && { opacity: 0.7 }]}
+        style={({ pressed }) => [
+          styles.retakeButton,
+          pressed && { opacity: 0.7 },
+        ]}
         onPress={() => navigation.goBack()}
       >
         <Text style={styles.retakeText}>
