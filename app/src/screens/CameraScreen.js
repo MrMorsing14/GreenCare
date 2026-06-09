@@ -89,7 +89,7 @@ export default function CameraScreen({ navigation }) {
       }
 
       const result = await response.json();
-
+      console.log("API response:", JSON.stringify(result));
       navigation.navigate("PlantDetail", {
         plant: {
           name: result.prediction,
