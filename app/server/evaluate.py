@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Load TFLite model
-model_path = os.path.join(os.path.dirname(__file__), 'plant_model.tflite')
+model_path = os.path.join(os.path.dirname(__file__), 'fold_1.keras')
 interpreter = tf.lite.Interpreter(model_path=model_path)
 interpreter.allocate_tensors()
 

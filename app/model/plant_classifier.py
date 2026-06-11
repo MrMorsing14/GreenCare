@@ -1,7 +1,4 @@
-
 #Plant Classifier — CNN with MobileNetV2 Transfer Learning
-
-
 import os
 os.environ['TF_DIRECTML_KERNEL_FALLBACK'] = '1'
 import json
