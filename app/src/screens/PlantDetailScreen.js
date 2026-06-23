@@ -23,6 +23,12 @@ export default function PlantDetailScreen({ route, navigation }) {
     care: { water: "N/A", sunlight: "N/A", soil: "N/A" },
   };
 
+  const care = plant.care || {
+    water: plant.care_water || "N/A",
+    sunlight: plant.care_sunlight || "N/A",
+    soil: plant.care_soil || "N/A",
+  };
+
   const isAlreadySaved = !!plant.id;
   const [nickname, setNickname] = useState("");
   const [signedImageUrl, setSignedImageUrl] = useState(
@@ -83,12 +89,12 @@ export default function PlantDetailScreen({ route, navigation }) {
       name: plant.name,
       nickname: nickname.trim() || null,
       confidence: plant.confidence,
-      care_water: plant.care.water,
-      care_sunlight: plant.care.sunlight,
-      care_soil: plant.care.soil,
+      care_water: care.water,
+      care_sunlight: care.sunlight,
+      care_soil: care.soil,
       image_url: imageUrl,
       last_watered: new Date().toISOString(),
-      water_interval_days: parseWaterInterval(plant.care.water),
+      water_interval_days: parseWaterInterval(care.water),
     });
 
     setSaving(false);
@@ -101,12 +107,6 @@ export default function PlantDetailScreen({ route, navigation }) {
         { text: "OK", onPress: () => navigation.popToTop() },
       ]);
     }
-  };
-
-  const care = plant.care || {
-    water: plant.care_water || "N/A",
-    sunlight: plant.care_sunlight || "N/A",
-    soil: plant.care_soil || "N/A",
   };
 
   return (

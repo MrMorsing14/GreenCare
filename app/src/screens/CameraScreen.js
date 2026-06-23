@@ -18,7 +18,7 @@ export default function CameraScreen({ navigation }) {
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef(null);
 
- 
+  //permission is null while the app is checking for permission, so we show a loading indicator
   if (!permission) {
     return (
       <View style={styles.permissionContainer}>
@@ -27,7 +27,8 @@ export default function CameraScreen({ navigation }) {
     );
   }
 
-  // Permission denied
+  //permission resolved, but not granted
+  //show a message to the user asking for permission
   if (!permission.granted) {
     return (
       <View style={styles.permissionContainer}>
